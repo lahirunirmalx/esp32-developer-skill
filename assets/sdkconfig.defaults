@@ -1,0 +1,50 @@
+# sdkconfig.defaults — DEVELOPMENT BASELINE.
+#
+# Applied to every env (dev and production). Keep only flags that are safe
+# and useful in BOTH build types here. Anything that is irreversible on the
+# device (Secure Boot, Flash Encryption release mode, anti-rollback,
+# NVS encryption) belongs in sdkconfig.production.defaults.
+#
+# Layering: production envs use
+#     board_build.sdkconfig_defaults = sdkconfig.defaults;sdkconfig.production.defaults
+# so the production overlay wins for any conflicting key.
+
+# --- Watchdogs (cheap, useful in dev) ---------------------------------------
+CONFIG_ESP_TASK_WDT=y
+CONFIG_ESP_TASK_WDT_TIMEOUT_S=10
+CONFIG_ESP_TASK_WDT_PANIC=y
+CONFIG_ESP_INT_WDT=y
+CONFIG_ESP_INT_WDT_TIMEOUT_MS=300
+
+# --- Brownout detection (physical safety, no reason to disable) -------------
+CONFIG_ESP_BROWNOUT_DET=y
+CONFIG_ESP_BROWNOUT_DET_LVL_SEL_7=y
+
+# --- Stack canary (catches bugs during dev) ---------------------------------
+CONFIG_COMPILER_STACK_CHECK=y
+CONFIG_COMPILER_STACK_CHECK_MODE_NORM=y
+
+# --- Logging — verbose enough for dev to be useful --------------------------
+CONFIG_LOG_DEFAULT_LEVEL_INFO=y
+CONFIG_LOG_MAXIMUM_LEVEL_DEBUG=y
+CONFIG_LOG_TIMESTAMP_SOURCE_RTOS=y
+
+# --- FreeRTOS diagnostics ---------------------------------------------------
+CONFIG_FREERTOS_USE_TRACE_FACILITY=y
+CONFIG_FREERTOS_GENERATE_RUN_TIME_STATS=y
+CONFIG_FREERTOS_CHECK_STACKOVERFLOW_CANARY=y
+CONFIG_FREERTOS_HZ=1000
+
+# --- Partition table --------------------------------------------------------
+CONFIG_PARTITION_TABLE_CUSTOM=y
+CONFIG_PARTITION_TABLE_CUSTOM_FILENAME="partitions.csv"
+
+# --- DEVELOPMENT explicitly DOES NOT enable: --------------------------------
+# CONFIG_SECURE_BOOT_V2_ENABLED            -- production overlay only
+# CONFIG_SECURE_FLASH_ENC_ENABLED          -- production overlay only
+# CONFIG_SECURE_FLASH_ENCRYPTION_MODE_RELEASE  -- production overlay only
+# CONFIG_BOOTLOADER_APP_ANTI_ROLLBACK      -- production overlay only
+# CONFIG_NVS_ENCRYPTION                    -- production overlay only
+#
+# DO NOT add these here. Once burned into efuse on a real device, they cannot
+# be undone, and a developer board with these flags becomes single-use.

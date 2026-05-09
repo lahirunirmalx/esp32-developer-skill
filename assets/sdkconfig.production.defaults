@@ -1,0 +1,42 @@
+# sdkconfig.production.defaults — PRODUCTION OVERLAY.
+#
+# Applied ONLY by *_production envs in platformio.ini, on top of
+# sdkconfig.defaults:
+#     board_build.sdkconfig_defaults = sdkconfig.defaults;sdkconfig.production.defaults
+#
+# Every flag in this file is ONE-WAY on a real device:
+#   - Secure Boot v2 burns the public-key digest into efuse.
+#   - Flash Encryption RELEASE mode disables the JTAG/UART download path.
+#   - Anti-rollback burns a monotonic version into efuse on first confirmation.
+#
+# Never run this overlay on a developer-shared board you intend to keep
+# flashable. Test the end-to-end flow on a sacrificial device first.
+
+# --- Secure Boot v2 ---------------------------------------------------------
+CONFIG_SECURE_BOOT=y
+CONFIG_SECURE_BOOT_V2_ENABLED=y
+CONFIG_SECURE_SIGNED_APPS_RSA_SCHEME=y
+CONFIG_SECURE_BOOT_BUILD_SIGNED_BINARIES=y
+# The signing key path is supplied by CI / HSM, not committed.
+# Override with: idf.py -DSDKCONFIG_OVERRIDE=... or environment variable.
+CONFIG_SECURE_BOOT_SIGNING_KEY="keys/secure_boot_signing_key.pem"
+
+# --- Flash Encryption (RELEASE mode) ----------------------------------------
+CONFIG_SECURE_FLASH_ENC_ENABLED=y
+CONFIG_SECURE_FLASH_ENCRYPTION_MODE_RELEASE=y
+CONFIG_SECURE_BOOT_INSECURE=n
+
+# --- Anti-rollback ----------------------------------------------------------
+CONFIG_BOOTLOADER_APP_ANTI_ROLLBACK=y
+CONFIG_BOOTLOADER_APP_SECURE_VERSION=1
+CONFIG_BOOTLOADER_APP_SECURE_VERSION_SIZE_EFUSE_FIELD=32
+CONFIG_APP_ROLLBACK_ENABLE=y
+CONFIG_BOOTLOADER_APP_TEST=y
+
+# --- NVS encryption ---------------------------------------------------------
+CONFIG_NVS_ENCRYPTION=y
+
+# --- Logging — drop verbosity for production --------------------------------
+CONFIG_LOG_DEFAULT_LEVEL_INFO=n
+CONFIG_LOG_DEFAULT_LEVEL_WARN=y
+CONFIG_LOG_MAXIMUM_LEVEL_INFO=y
